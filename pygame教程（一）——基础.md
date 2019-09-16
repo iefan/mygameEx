@@ -155,3 +155,25 @@ True
 >>>  
 ```
 
+对于创建的区域`rect`，其有以下属性，列表以备查询：
+
+| Attribute Name     | Description                     |
+| :----------------- | ------------------------------- |
+| myRect.left        | 区域左边横坐标，整数            |
+| myRect.right       | 区域右边横坐标，整数            |
+| myRect.top         | 区域上边纵坐标，整数            |
+| myRect.bottom      | 区域下边纵坐标，整数            |
+| myRect.centerx     | 区域中心横坐标，整数            |
+| myRect.centery     | 区域中心纵坐标，整数            |
+| myRect.width       | 区域宽度，整数                  |
+| myRect.height      | 区域高度，整数                  |
+| myRect.size        | 宽高二元数组，(width, height)   |
+| myRect.topleft     | 左上顶点坐标: (left, top)       |
+| myRect.topright    | 右上顶点坐标: (right, top)      |
+| myRect.bottomleft  | 左下顶点坐标: (left, bottom)    |
+| myRect.bottomright | 右下顶点坐标: (right, bottom)   |
+| myRect.midleft     | 左边中点坐标: (left, centery)   |
+| myRect.midright    | 右边中点坐标: (right, centery)  |
+| myRect.midtop      | 上边中点坐标: (centerx, top)    |
+| myRect.midbottom   | 下边中点坐标: (centerx, bottom) |
+

@@ -1,2 +1,2 @@
 # mygameEx
-pygame_ex
+pygame教程
