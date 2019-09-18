@@ -31,7 +31,7 @@ BLUE  = (0, 0, 255)
 flag = True
 while True:
     curSurface.fill(WHITE)
-    flag = not flag
+    # flag = not flag
     # time.sleep(0.1)
 
     if direction == "right":

@@ -24,10 +24,10 @@ RED   = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE  = (0, 0, 255)
 
-# curSurface.fill(WHITE)
+curSurface.fill(WHITE)
 
 while True:
-    curSurface.fill(WHITE)
+    # curSurface.fill(WHITE)
     # time.sleep(0.1)
 
     if direction == "right":
