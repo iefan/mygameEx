@@ -25,7 +25,7 @@ pygame.display.set_caption("迷宫")
 
 # fontObj = pygame.font.Font('simsunb.ttf', 32)
 fontObj = pygame.font.SysFont("simhei", 50)
-headTextObj = fontObj.render("迷宫", True, GREEN, WHITE)
+headTextObj = fontObj.render("迷宫", True, WHITE, NAVYBLUE)
 headRectObj = headTextObj.get_rect()
 headRectObj.center = (300, 50)
 
@@ -92,8 +92,12 @@ while True:
             mouse_x, mouse_y = event.pos
             # print(mouse_x, mouse_y)
         elif event.type == KEYUP:
+            print(event.key, chr(event.key), pygame.key.get_mods())
             if event.key in (K_h, K_e, K_l, K_o, K_w, K_r, K_d):
-                print(event.key, chr(event.key))
+                if pygame.key.get_mods() in (1, 8192):
+                    print("你输入的是：", chr(event.key).upper())
+                else:
+                    print("你输入的是：", chr(event.key))
     
     findBlockByPos(mouse_x, mouse_y)
     pygame.display.update()
