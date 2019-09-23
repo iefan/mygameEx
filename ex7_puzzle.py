@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 import pygame, sys, random
 from pygame.locals import *
+x = 100
+y = 100
+import os
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (x,y)
 
 pygame.init()
 
@@ -34,7 +38,15 @@ def generatePos():
             lstBlockRect[i][j] = (70+i*(blockWidth+30),90+j*(blockWidth+30), blockWidth, blockWidth)
 
 generatePos()
-print(lstBlockRect)
+## print(lstBlockRect)
+
+def findBlockByPos(mouse_x, mouse_y):
+    for i in range(m):
+        for j in range(n):
+            if mouse_x > lstBlockRect[i][j][0] and mouse_x <= lstBlockRect[i][j][0] + blockWidth:
+                if mouse_y > lstBlockRect[i][j][1] and mouse_y <= lstBlockRect[i][j][1] + blockWidth:
+                    print("pos", i, j)
+
 def drawBackGround():
     curSurface.fill(NAVYBLUE)
     for i in range(m):
@@ -63,6 +75,7 @@ def drawIcon():
 
 while True:
     drawBackGround()
+    mouse_x,mouse_y = -1,-1
     drawIcon()
     # curSurface.fill(WHITE)
     # curSurface.blit(textSurfaceObj, textRectObj)
@@ -75,6 +88,13 @@ while True:
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
-        print(event.type)
+        elif event.type == MOUSEBUTTONUP:
+            mouse_x, mouse_y = event.pos
+            # print(mouse_x, mouse_y)
+        elif event.type == KEYUP:
+            if event.key in (K_h, K_e, K_l, K_o, K_w, K_r, K_d):
+                print(event.key, chr(event.key))
+    
+    findBlockByPos(mouse_x, mouse_y)
     pygame.display.update()
     # fpsClock.tick(FPS)
