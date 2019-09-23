@@ -25,16 +25,22 @@ headTextObj = fontObj.render("迷宫", True, GREEN, WHITE)
 headRectObj = headTextObj.get_rect()
 headRectObj.center = (300, 50)
 
-lstBlockRect = []
+m = 6
+n = 6
+lstBlockRect = [[0 for i in range(m)] for j in range(n)]
+def generatePos():
+    for i in range(m):
+        for j in range(n):
+            lstBlockRect[i][j] = (70+i*(blockWidth+30),90+j*(blockWidth+30), blockWidth, blockWidth)
+
+generatePos()
+print(lstBlockRect)
 def drawBackGround():
     curSurface.fill(NAVYBLUE)
-    for i in range(6):
-        for j in range(6):
-            lstBlockRect[i][j] = (70+i*(blockWidth+30),90+j*(blockWidth+30), blockWidth, blockWidth)
-            pygame.draw.rect(curSurface, WHITE, (70+i*(blockWidth+30),90+j*(blockWidth+30), blockWidth, blockWidth))
+    for i in range(m):
+        for j in range(n):
+            pygame.draw.rect(curSurface, WHITE, lstBlockRect[i][j])
     curSurface.blit(headTextObj, headRectObj)
-# curSurface.fill(WHITE)
-# flag = True
 
 lstIcon = []
 def loadIcon():
@@ -69,5 +75,6 @@ while True:
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
+        print(event.type)
     pygame.display.update()
     # fpsClock.tick(FPS)
