@@ -2,9 +2,9 @@
 import pygame, sys, random
 from pygame.locals import *
 import os
-x = 100
-y = 100
-os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (x,y) #设置窗口起始位置
+pos_x = 100
+pos_y = 100
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (pos_x,pos_y) #设置窗口起始位置
 
 pygame.init()
 
@@ -17,10 +17,16 @@ RED   = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE  = (0, 0, 255)
 NAVYBLUE = ( 60, 60, 100)
+YELLOW = (255, 255,0)
+
 
 blockWidth = 45
+g_ClickCount = -1
+g_TotalSecond = 0
+first_ClickIcon = [0,0]
+second_ClickIcon = [0,0]
 
-curSurface = pygame.display.set_mode((600, 560), 0, 32)
+curSurface = pygame.display.set_mode((630, 560), 0, 32)
 pygame.display.set_caption("迷宫")
 
 # fontObj = pygame.font.Font('simsunb.ttf', 32)
@@ -29,10 +35,32 @@ headTextObj = fontObj.render("迷宫", True, WHITE, NAVYBLUE)
 headRectObj = headTextObj.get_rect()
 headRectObj.center = (300, 50)
 
+infoFontObj = pygame.font.SysFont("simhei", 16)
+infoTextObj = infoFontObj.render("点击次数：", True, YELLOW, NAVYBLUE)
+infoRectObj = infoTextObj.get_rect()
+infoRectObj.center = (580, 100)
+infoTextObj2 = infoFontObj.render("0 次", True, YELLOW, NAVYBLUE)
+infoRectObj2 = infoTextObj2.get_rect()
+infoRectObj2.center = (580, 130)
+
+infoTextObj3 = infoFontObj.render("计  时", True, YELLOW, NAVYBLUE)
+infoRectObj3 = infoTextObj3.get_rect()
+infoRectObj3.center = (580, 200)
+
+infoTextObj4 = infoFontObj.render("0 秒", True, YELLOW, NAVYBLUE)
+infoRectObj4 = infoTextObj4.get_rect()
+infoRectObj4.center = (580, 230)
+
+infoHelpText = infoFontObj.render("按g重新开始", True, YELLOW, NAVYBLUE)
+infoHelpRect = infoHelpText.get_rect()
+infoHelpRect.center = (580, 300)
+
+
 m = 6
 n = 6
 lstBlockRect = [[0 for i in range(m)] for j in range(n)]
-lstBlockFlag = [[0 for i in range(m)] for j in range(n)]
+lstBlockFlag = [[1 for i in range(m)] for j in range(n)]
+lstBlockFlag_OVER = [[1 for i in range(m)] for j in range(n)]
 def generatePos():
     for i in range(m):
         for j in range(n):
@@ -74,7 +102,13 @@ def drawBackGround():
             else:
                 pygame.draw.rect(curSurface, NAVYBLUE, (70+i*(blockWidth+30),90+j*(blockWidth+30), blockWidth, blockWidth))
                 curSurface.blit(lstIcon[i*6+j], (70+i*(blockWidth+30),90+j*(blockWidth+30), blockWidth, blockWidth))
+    
     curSurface.blit(headTextObj, headRectObj)
+    curSurface.blit(infoTextObj, infoRectObj)
+    curSurface.blit(infoTextObj2, infoRectObj2)
+    curSurface.blit(infoTextObj3, infoRectObj3)
+    curSurface.blit(infoTextObj4, infoRectObj4)
+    curSurface.blit(infoHelpText, infoHelpRect)
 
 # 根据位置绘制图标
 def drawIcon(indx_x=-1, indx_y=-1):
@@ -86,19 +120,34 @@ def drawIcon(indx_x=-1, indx_y=-1):
     else:
         i = indx_x
         j = indx_y
-
         pygame.draw.rect(curSurface, NAVYBLUE, (70+i*(blockWidth+30),90+j*(blockWidth+30), blockWidth, blockWidth))
         curSurface.blit(lstIcon[i*6+j], (70+i*(blockWidth+30),90+j*(blockWidth+30), blockWidth, blockWidth))
 
 for i in range(m*n):
     for j in range(m*n):
         if i!=j and lstIcon[i] == lstIcon[j]:
-            print(i,j)
+            print(i,j, '===>', (i%6+1, i//6+1), (j%6+1, j//6+1))
+
+DISPFIRST = pygame.USEREVENT #创建自定义事件，第一次全部显示供用户记忆
+pygame.time.set_timer(DISPFIRST, 5000)
+
+DISPINFOTEXT = pygame.USEREVENT+1 #创建自定义事件，计时
+pygame.time.set_timer(DISPINFOTEXT, 0)
+
+
+# lstBlockFlag = [[1 for i in range(m)] for j in range(n)]
 
 while True:
     drawBackGround()
     mouse_x,mouse_y = -1,-1
-    # drawIcon() #绘制所有图标
+    
+    if g_ClickCount%2==0 and second_ClickIcon[0] != first_ClickIcon[0]:
+        # print(first_ClickIcon, second_ClickIcon)
+        pygame.time.wait(300)
+        lastIcon = first_ClickIcon[1]
+        thisIcon = second_ClickIcon[1]
+        lstBlockFlag[lastIcon[0]][lastIcon[1]] = 0
+        lstBlockFlag[thisIcon[0]][thisIcon[1]] = 0
     # curSurface.fill(WHITE)
     # curSurface.blit(textSurfaceObj, textRectObj)
     # for iobj in lstfont:
@@ -113,18 +162,49 @@ while True:
         elif event.type == MOUSEBUTTONUP:
             mouse_x, mouse_y = event.pos
             # print(mouse_x, mouse_y)
+        elif event.type == DISPFIRST:
+            lstBlockFlag = [[0 for i in range(m)] for j in range(n)]
+            g_ClickCount = 0
+            pygame.time.set_timer(DISPFIRST, 0)
+            pygame.time.set_timer(DISPINFOTEXT, 1000)
+
+        elif event.type == DISPINFOTEXT:
+            g_TotalSecond += 1
+            infoTextObj4 = infoFontObj.render(str(g_TotalSecond)+"秒", True, YELLOW, NAVYBLUE)
+            infoRectObj4 = infoTextObj4.get_rect()
+            infoRectObj4.center = (580, 230)
+            if lstBlockFlag == lstBlockFlag_OVER:
+                pygame.time.set_timer(DISPINFOTEXT, 0) #全部选完关闭计时
+            # print(g_TotalSecond)
+
         elif event.type == KEYUP:
-            print(event.key, chr(event.key), pygame.key.get_mods())
-            if event.key in (K_h, K_e, K_l, K_o, K_w, K_r, K_d):
-                if pygame.key.get_mods() in (1, 8192):
-                    print("你输入的是：", chr(event.key).upper())
-                else:
-                    print("你输入的是：", chr(event.key))
+            print(event.key, chr(event.key)=='g', pygame.key.get_mods())
+            if chr(event.key) == 'g': #重新开始
+                g_ClickCount = 0
+                g_TotalSecond = 0
+                first_ClickIcon = [0,0]
+                second_ClickIcon = [0,0]
+                lstBlockFlag = [[0 for i in range(m)] for j in range(n)]
+                infoTextObj2 = infoFontObj.render("0次", True, YELLOW, NAVYBLUE)
+                infoRectObj2 = infoTextObj2.get_rect()
+                infoRectObj2.center = (580, 130)
+               
     
     curIcon = findBlockByPos(mouse_x, mouse_y)
-    if curIcon != (-1,-1):
-        drawIcon(curIcon[0], curIcon[1])
+    if curIcon != (-1,-1) and  lstBlockFlag != lstBlockFlag_OVER:
+        #显示点击次数
+        g_ClickCount += 1
+        infoTextObj2 = infoFontObj.render(str(g_ClickCount)+"次", True, YELLOW, NAVYBLUE)
+        infoRectObj2 = infoTextObj2.get_rect()
+        infoRectObj2.center = (580, 130)
+
+        # 修改被击点的图标标志
         lstBlockFlag[curIcon[0]][curIcon[1]] = 1
-        # pygame.time.wait(1000)
+        indx_icon = curIcon[0]*n+curIcon[1]
+        if g_ClickCount % 2 == 1: 
+            first_ClickIcon = [lstIcon[indx_icon], curIcon]
+        else:
+            second_ClickIcon = [lstIcon[indx_icon], curIcon]
+            
     pygame.display.update()
     # fpsClock.tick(FPS)
