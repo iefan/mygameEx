@@ -100,7 +100,7 @@ def drawBackGround():
             if lstBlockFlag[i][j] == 0:
                 pygame.draw.rect(curSurface, WHITE, lstBlockRect[i][j])
             else:
-                pygame.draw.rect(curSurface, NAVYBLUE, (70+i*(blockWidth+30),90+j*(blockWidth+30), blockWidth, blockWidth))
+                # pygame.draw.rect(curSurface, NAVYBLUE, (70+i*(blockWidth+30),90+j*(blockWidth+30), blockWidth, blockWidth))
                 curSurface.blit(lstIcon[i*6+j], (70+i*(blockWidth+30),90+j*(blockWidth+30), blockWidth, blockWidth))
     
     curSurface.blit(headTextObj, headRectObj)
