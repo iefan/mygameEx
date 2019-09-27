@@ -4,7 +4,7 @@ from pygame.locals import *
 import os
 x = 100
 y = 100
-os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (x,y)
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (x,y) #设置窗口起始位置
 
 pygame.init()
 
@@ -32,6 +32,7 @@ headRectObj.center = (300, 50)
 m = 6
 n = 6
 lstBlockRect = [[0 for i in range(m)] for j in range(n)]
+lstBlockFlag = [[0 for i in range(m)] for j in range(n)]
 def generatePos():
     for i in range(m):
         for j in range(n):
@@ -40,23 +41,7 @@ def generatePos():
 generatePos() #生成所有图标的位置数据
 ## print(lstBlockRect)
 
-def findBlockByPos(mouse_x, mouse_y):
-    for i in range(m):
-        for j in range(n):
-            if mouse_x > lstBlockRect[i][j][0] and mouse_x <= lstBlockRect[i][j][0] + blockWidth:
-                if mouse_y > lstBlockRect[i][j][1] and mouse_y <= lstBlockRect[i][j][1] + blockWidth:
-                    print("pos", i, j)
-
-def drawBackGround():
-    ```
-    绘制背景
-    ```
-    curSurface.fill(NAVYBLUE)
-    for i in range(m):
-        for j in range(n):
-            pygame.draw.rect(curSurface, WHITE, lstBlockRect[i][j])
-    curSurface.blit(headTextObj, headRectObj)
-
+# 将图标加载到全局列表中
 lstIcon = []
 def loadIcon():
     for i in range(1, 19):
@@ -69,17 +54,51 @@ def loadIcon():
 loadIcon()
 random.shuffle(lstIcon)#将图标排列随机化
 
-# print(lstIcon, len(lstIcon))
-def drawIcon():
-    for i in range(6):
-        for j in range(6):
-            pygame.draw.rect(curSurface, NAVYBLUE, (70+i*(blockWidth+30),90+j*(blockWidth+30), blockWidth, blockWidth))
-            curSurface.blit(lstIcon[i*6+j], (70+i*(blockWidth+30),90+j*(blockWidth+30), blockWidth, blockWidth))
+# 根据用户点击鼠标位置查找到相应的图标
+def findBlockByPos(mouse_x, mouse_y):
+    for i in range(m):
+        for j in range(n):
+            if mouse_x > lstBlockRect[i][j][0] and mouse_x <= lstBlockRect[i][j][0] + blockWidth:
+                if mouse_y > lstBlockRect[i][j][1] and mouse_y <= lstBlockRect[i][j][1] + blockWidth:
+                    # print("pos", i, j)
+                    return (i,j)
+    return(-1,-1)
+
+#绘制背景
+def drawBackGround():
+    curSurface.fill(NAVYBLUE)
+    for i in range(m):
+        for j in range(n):
+            if lstBlockFlag[i][j] == 0:
+                pygame.draw.rect(curSurface, WHITE, lstBlockRect[i][j])
+            else:
+                pygame.draw.rect(curSurface, NAVYBLUE, (70+i*(blockWidth+30),90+j*(blockWidth+30), blockWidth, blockWidth))
+                curSurface.blit(lstIcon[i*6+j], (70+i*(blockWidth+30),90+j*(blockWidth+30), blockWidth, blockWidth))
+    curSurface.blit(headTextObj, headRectObj)
+
+# 根据位置绘制图标
+def drawIcon(indx_x=-1, indx_y=-1):
+    if indx_x == -1 and indx_y == -1:
+        for i in range(6):
+            for j in range(6):
+                pygame.draw.rect(curSurface, NAVYBLUE, (70+i*(blockWidth+30),90+j*(blockWidth+30), blockWidth, blockWidth))
+                curSurface.blit(lstIcon[i*6+j], (70+i*(blockWidth+30),90+j*(blockWidth+30), blockWidth, blockWidth))
+    else:
+        i = indx_x
+        j = indx_y
+
+        pygame.draw.rect(curSurface, NAVYBLUE, (70+i*(blockWidth+30),90+j*(blockWidth+30), blockWidth, blockWidth))
+        curSurface.blit(lstIcon[i*6+j], (70+i*(blockWidth+30),90+j*(blockWidth+30), blockWidth, blockWidth))
+
+for i in range(m*n):
+    for j in range(m*n):
+        if i!=j and lstIcon[i] == lstIcon[j]:
+            print(i,j)
 
 while True:
     drawBackGround()
     mouse_x,mouse_y = -1,-1
-    drawIcon()
+    # drawIcon() #绘制所有图标
     # curSurface.fill(WHITE)
     # curSurface.blit(textSurfaceObj, textRectObj)
     # for iobj in lstfont:
@@ -102,6 +121,10 @@ while True:
                 else:
                     print("你输入的是：", chr(event.key))
     
-    findBlockByPos(mouse_x, mouse_y)
+    curIcon = findBlockByPos(mouse_x, mouse_y)
+    if curIcon != (-1,-1):
+        drawIcon(curIcon[0], curIcon[1])
+        lstBlockFlag[curIcon[0]][curIcon[1]] = 1
+        # pygame.time.wait(1000)
     pygame.display.update()
     # fpsClock.tick(FPS)
