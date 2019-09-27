@@ -2,6 +2,18 @@
 import pygame, sys, random
 from pygame.locals import *
 import os
+import pygame_textinput
+# import PySimpleGUI as sg
+
+# layout = [ [sg.Text('Enter your name'), sg.InputText()],      
+#            [sg.OK()] ]
+
+# window = sg.Window('My first GUI').Layout(layout)
+# button, (name,) = window.Read()
+
+# Create TextInput-object
+
+
 pos_x = 100
 pos_y = 100
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (pos_x,pos_y) #设置窗口起始位置
@@ -19,7 +31,7 @@ BLUE  = (0, 0, 255)
 NAVYBLUE = ( 60, 60, 100)
 YELLOW = (255, 255,0)
 
-
+textinput = pygame_textinput.TextInput(initial_string="宝贝", font_size=24, text_color=WHITE, font_family="simhei")
 blockWidth = 45
 g_ClickCount = -1
 g_TotalSecond = 0
@@ -39,7 +51,7 @@ infoFontObj = pygame.font.SysFont("simhei", 16)
 infoTextObj = infoFontObj.render("点击次数：", True, YELLOW, NAVYBLUE)
 infoRectObj = infoTextObj.get_rect()
 infoRectObj.center = (580, 100)
-infoTextObj2 = infoFontObj.render("0 次", True, YELLOW, NAVYBLUE)
+infoTextObj2 = infoFontObj.render("0次", True, YELLOW, NAVYBLUE)
 infoRectObj2 = infoTextObj2.get_rect()
 infoRectObj2.center = (580, 130)
 
@@ -47,13 +59,13 @@ infoTextObj3 = infoFontObj.render("计  时", True, YELLOW, NAVYBLUE)
 infoRectObj3 = infoTextObj3.get_rect()
 infoRectObj3.center = (580, 200)
 
-infoTextObj4 = infoFontObj.render("0 秒", True, YELLOW, NAVYBLUE)
+infoTextObj4 = infoFontObj.render("0秒", True, YELLOW, NAVYBLUE)
 infoRectObj4 = infoTextObj4.get_rect()
 infoRectObj4.center = (580, 230)
 
-infoHelpText = infoFontObj.render("按g重新开始", True, YELLOW, NAVYBLUE)
+infoHelpText = infoFontObj.render("按↑重新开始", True, YELLOW, NAVYBLUE)
 infoHelpRect = infoHelpText.get_rect()
-infoHelpRect.center = (580, 300)
+infoHelpRect.center = (570, 260)
 
 
 m = 6
@@ -109,6 +121,7 @@ def drawBackGround():
     curSurface.blit(infoTextObj3, infoRectObj3)
     curSurface.blit(infoTextObj4, infoRectObj4)
     curSurface.blit(infoHelpText, infoHelpRect)
+    curSurface.blit(textinput.get_surface(), (520, 400))
 
 # 根据位置绘制图标
 def drawIcon(indx_x=-1, indx_y=-1):
@@ -134,9 +147,6 @@ pygame.time.set_timer(DISPFIRST, 5000)
 DISPINFOTEXT = pygame.USEREVENT+1 #创建自定义事件，计时
 pygame.time.set_timer(DISPINFOTEXT, 0)
 
-
-# lstBlockFlag = [[1 for i in range(m)] for j in range(n)]
-
 while True:
     drawBackGround()
     mouse_x,mouse_y = -1,-1
@@ -148,14 +158,9 @@ while True:
         thisIcon = second_ClickIcon[1]
         lstBlockFlag[lastIcon[0]][lastIcon[1]] = 0
         lstBlockFlag[thisIcon[0]][thisIcon[1]] = 0
-    # curSurface.fill(WHITE)
-    # curSurface.blit(textSurfaceObj, textRectObj)
-    # for iobj in lstfont:
-    #     curSurface.blit(iobj[0], iobj[1])
 
-    # curSurface.blit(headTextObj, headRectObj)
-    
-    for event in pygame.event.get():
+    events = pygame.event.get()
+    for event in events:
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
@@ -169,8 +174,8 @@ while True:
             pygame.time.set_timer(DISPINFOTEXT, 1000)
 
         elif event.type == DISPINFOTEXT:
-            g_TotalSecond += 1
             infoTextObj4 = infoFontObj.render(str(g_TotalSecond)+"秒", True, YELLOW, NAVYBLUE)
+            g_TotalSecond += 1
             infoRectObj4 = infoTextObj4.get_rect()
             infoRectObj4.center = (580, 230)
             if lstBlockFlag == lstBlockFlag_OVER:
@@ -178,21 +183,28 @@ while True:
             # print(g_TotalSecond)
 
         elif event.type == KEYUP:
-            print(event.key, chr(event.key)=='g', pygame.key.get_mods())
-            if chr(event.key) == 'g': #重新开始
-                g_ClickCount = 0
+            print(event.key, chr(event.key)=='↑', pygame.key.get_mods())
+            if event.key == 273: #重新开始
+                g_ClickCount = -1
                 g_TotalSecond = 0
                 first_ClickIcon = [0,0]
                 second_ClickIcon = [0,0]
-                lstBlockFlag = [[0 for i in range(m)] for j in range(n)]
+                lstBlockFlag = [[1 for i in range(m)] for j in range(n)]
+                random.shuffle(lstIcon) #将图标排列随机化
+                
+
                 infoTextObj2 = infoFontObj.render("0次", True, YELLOW, NAVYBLUE)
                 infoRectObj2 = infoTextObj2.get_rect()
                 infoRectObj2.center = (580, 130)
+                pygame.time.set_timer(DISPFIRST, 5000) #玩家记忆时间
+                # pygame.time.set_timer(DISPINFOTEXT, 1000) #重启计时器
                
-    
+    textinput.update(events)#输入框
+
     curIcon = findBlockByPos(mouse_x, mouse_y)
     if curIcon != (-1,-1) and  lstBlockFlag != lstBlockFlag_OVER:
         #显示点击次数
+        
         g_ClickCount += 1
         infoTextObj2 = infoFontObj.render(str(g_ClickCount)+"次", True, YELLOW, NAVYBLUE)
         infoRectObj2 = infoTextObj2.get_rect()
