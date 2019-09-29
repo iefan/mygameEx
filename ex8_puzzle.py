@@ -26,7 +26,7 @@ g_ClickCount = -1
 g_TotalSecond = 0
 first_ClickIcon = [0,0]
 second_ClickIcon = [0,0]
-g_USERNAME = "DS"
+g_USERNAME = "psy"
 textinput = pygame_textinput.TextInput(initial_string=g_USERNAME, font_size=24, text_color=WHITE, font_family="simhei")
 
 
@@ -194,7 +194,8 @@ while True:
             infoRectObj4.center = (580, 230)
 
             #程序结束
-            if lstBlockFlag == lstBlockFlag_OVER:
+            if lstBlockFlag == lstBlockFlag_OVER and g_ClickCount > 1:
+                # print(lstBlockFlag)
                 pygame.time.set_timer(DISPINFOTEXT, 0) #全部选完关闭计时
 
                 lstRankNameAndTime.append([g_TotalSecond-1, g_USERNAME])
@@ -205,6 +206,9 @@ while True:
 
                 with open('rank.dat', 'w') as f:
                     f.write(rankInfoStr)
+
+                lstRankNameAndTime = []
+                getRankInfo() #调用最新排名
                     
             # print(g_TotalSecond)
 
@@ -221,8 +225,9 @@ while True:
                 second_ClickIcon = [0,0]
                 lstBlockFlag = [[1 for i in range(m)] for j in range(n)]
                 random.shuffle(lstIcon) #将图标排列随机化
+                lstRankNameAndTime = []
                 getRankInfo() #调用最新排名
-                
+  
                 infoTextObj2 = infoFontObj.render("0次", True, YELLOW, NAVYBLUE)
                 infoRectObj2 = infoTextObj2.get_rect()
                 infoRectObj2.center = (580, 130)
