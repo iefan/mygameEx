@@ -27,6 +27,7 @@ g_TotalSecond = 0
 first_ClickIcon = [0,0]
 second_ClickIcon = [0,0]
 g_USERNAME = "psy"
+g_BlankTileBlock = 15
 textinput = pygame_textinput.TextInput(initial_string=g_USERNAME, font_size=24, text_color=WHITE, font_family="simhei")
 
 
@@ -111,13 +112,14 @@ generatePos() #生成所有棋子的位置数据
 #绘制背景
 def drawBackGround():
     curSurface.fill(NAVYBLUE)
-    for i in range(m*n-1):
+    for i in range(m*n):
         curblock = lstTilesBlock[i]
-        pygame.draw.rect(curSurface, GREEN, curblock[0])
-        tmpNumber = numberFontObj.render(str(curblock[1]), True, WHITE, GREEN)
-        tmpNumberRect = tmpNumber.get_rect()
-        tmpNumberRect.center = (curblock[0].left+ blockWidth/2, curblock[0].top+ blockWidth/2)
-        curSurface.blit(tmpNumber, tmpNumberRect)
+        if curblock[1] != 16:
+            pygame.draw.rect(curSurface, GREEN, curblock[0])
+            tmpNumber = numberFontObj.render(str(curblock[1]), True, WHITE, GREEN)
+            tmpNumberRect = tmpNumber.get_rect()
+            tmpNumberRect.center = (curblock[0].left+ blockWidth/2, curblock[0].top+ blockWidth/2)
+            curSurface.blit(tmpNumber, tmpNumberRect)
 
     pygame.draw.rect(curSurface, YELLOW, [65, 105, 425, 425],7)
     curSurface.blit(headTextObj, headRectObj)
@@ -140,7 +142,7 @@ def printTile(pos):
 def findCanMoveTiles():
     lstCanMoveTile = []
     for i in range(m*n):
-        lstTilesBlock[i][2] = '0000' #左上右下标志
+        # lstTilesBlock[i][2] = '0000' #左上右下标志
         if lstTilesBlock[i][1] == 16: #找到空格
             row = i//m
             col = i % n
@@ -149,7 +151,7 @@ def findCanMoveTiles():
             left    = (col-1)>=0  and row*m + (col-1)    or -1
             right   = (col+1)<n and row*m + (col+1)      or -1
 
-            # print([left, top, right, bottom])
+            print([left, top, right, bottom])
             icount = -1
             for item in [right, bottom, left, top]:
                 icount += 1
@@ -157,8 +159,10 @@ def findCanMoveTiles():
                     tmp = list(lstTilesBlock[item][2])
                     tmp[icount] = '1'
                     lstTilesBlock[item][2] = ''.join(tmp)
+                    # print(lstTilesBlock[item])
                     lstCanMoveTile.append(lstTilesBlock[item])
-                    print(lstTilesBlock[item][1], lstTilesBlock[item][2])
+                    # print(lstCanMoveTile, '~!!!!', lstTilesBlock[item])
+    # print('-----', lstCanMoveTile)
     return lstCanMoveTile
 
 findCanMoveTiles()
@@ -173,6 +177,41 @@ def MoveTileToBlank(curTile, blankTile, orientation, curRectCopy):
         else:
             blankTile[0].top = curRectCopy.top
             startMoveFlag = 0
+            firstIndex = lstTilesBlock.index(curTile)
+            curTile[2] = '0000'
+            secondIndex = lstTilesBlock.index(blankTile)
+            lstTilesBlock[firstIndex],lstTilesBlock[secondIndex] = lstTilesBlock[secondIndex],lstTilesBlock[firstIndex]
+    elif orientation == "up":
+        if curTile[0].top > blankTile[0].top:
+            curTile[0].top -= 1
+        else:
+            blankTile[0].top = curRectCopy.top
+            startMoveFlag = 0
+            firstIndex = lstTilesBlock.index(curTile)
+            curTile[2] = '0000'
+            secondIndex = lstTilesBlock.index(blankTile)
+            lstTilesBlock[firstIndex],lstTilesBlock[secondIndex] = lstTilesBlock[secondIndex],lstTilesBlock[firstIndex]
+    elif orientation == "left":
+        if curTile[0].left > blankTile[0].left:
+            curTile[0].left -= 1
+        else:
+            blankTile[0].left = curRectCopy.left
+            startMoveFlag = 0
+            firstIndex = lstTilesBlock.index(curTile)
+            curTile[2] = '0000'
+            secondIndex = lstTilesBlock.index(blankTile)
+            lstTilesBlock[firstIndex],lstTilesBlock[secondIndex] = lstTilesBlock[secondIndex],lstTilesBlock[firstIndex]
+    elif orientation == "right":
+        if curTile[0].left < blankTile[0].left:
+            curTile[0].left += 1
+        else:
+            blankTile[0].left = curRectCopy.left
+            startMoveFlag = 0
+            firstIndex = lstTilesBlock.index(curTile)
+            curTile[2] = '0000'
+            secondIndex = lstTilesBlock.index(blankTile)
+            lstTilesBlock[firstIndex],lstTilesBlock[secondIndex] = lstTilesBlock[secondIndex],lstTilesBlock[firstIndex]
+
 
 DISPFIRST = pygame.USEREVENT #创建自定义事件，第一次全部显示供用户记忆
 pygame.time.set_timer(DISPFIRST, 5000)
@@ -187,17 +226,11 @@ orientation = ''
 while True:
     drawBackGround()
     if startMoveFlag:
+        # print(curTile, blankTile, orientation, curRectCopy)
         MoveTileToBlank(curTile, blankTile, orientation, curRectCopy)
         #lstTilesBlock[firstIndex],lstTilesBlock[secondIndex] = lstTilesBlock[secondIndex],lstTilesBlock[firstIndex]
 
-        #print(lstTilesBlock.index(curTile), '====================')
-    else:
-        print(startMoveFlag)
-        if curTile != "":
-            firstIndex = lstTilesBlock.index(curTile)
-            secondIndex = lstTilesBlock.index(blankTile)
-            lstTilesBlock[firstIndex],lstTilesBlock[secondIndex] = lstTilesBlock[secondIndex],lstTilesBlock[firstIndex]
-    
+            
     mouse_x,mouse_y = -1,-1
     
     events = pygame.event.get()
@@ -244,17 +277,51 @@ while True:
         elif event.type == KEYUP:
             print(event.key, chr(event.key)=='↑', pygame.key.get_mods())
             canMoveTiles = findCanMoveTiles()
-            print(canMoveTiles)
+            # print('canMoveTiles', canMoveTiles)
+            
             if event.key == K_DOWN:
                 for item in canMoveTiles:
                     if item[2][3] == '1':
                         curTile = item
                         curRectCopy = curTile[0].copy()
-                        blankTile = lstTilesBlock[15]
+                        blankTile = lstTilesBlock[g_BlankTileBlock]
                         orientation = 'down'
                         startMoveFlag = 1
+                        g_BlankTileBlock = lstTilesBlock.index(curTile)
 
-            elif event.key == 13: #重新开始
+            if event.key == K_UP:
+                for item in canMoveTiles:
+                    # print('up,canmove', item)
+                    if item[2][1] == '1':
+                        curTile = item
+                        curRectCopy = curTile[0].copy()
+                        blankTile = lstTilesBlock[g_BlankTileBlock]
+                        orientation = 'up'
+                        startMoveFlag = 1
+                        g_BlankTileBlock = lstTilesBlock.index(curTile)
+
+            if event.key == K_LEFT:
+                for item in canMoveTiles:
+                    if item[2][0] == '1':
+                        curTile = item
+                        curRectCopy = curTile[0].copy()
+                        blankTile = lstTilesBlock[g_BlankTileBlock]
+                        orientation = 'left'
+                        startMoveFlag = 1
+                        g_BlankTileBlock = lstTilesBlock.index(curTile)
+
+            if event.key == K_RIGHT:
+                for item in canMoveTiles:
+                    if item[2][2] == '1':
+                        curTile = item
+                        curRectCopy = curTile[0].copy()
+                        blankTile = lstTilesBlock[g_BlankTileBlock]
+                        orientation = 'right'
+                        startMoveFlag = 1
+                        g_BlankTileBlock = lstTilesBlock.index(curTile)
+            
+
+            if event.key == 13: #重新开始
                 # if textinput.update(events): #获取用户名称
                 #     g_USERNAME = textinput.get_text()
                 #     print(g_USERNAME)
