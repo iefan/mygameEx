@@ -68,6 +68,8 @@ lstRankInfo = []
 lstRankNameAndTime = []
 flag_Start = 0
 
+startMoveFlag = 0
+
 def getRankInfo():
     if os.path.exists(r'd:/myprogram/rank.dat'):
         with open(r'd:/myprogram/rank.dat', encoding='utf-8' ) as f:
@@ -143,9 +145,9 @@ def findCanMoveTiles():
             row = i//m
             col = i % n
             top     = (row-1)>=0  and (row-1)*m+col      or -1
-            bottom  = (row+1)<m and (row+1)*m+col      or -1
+            bottom  = (row+1)<m and (row+1)*m+col        or -1
             left    = (col-1)>=0  and row*m + (col-1)    or -1
-            right   = (col+1)<n and row*m + (col+1)    or -1
+            right   = (col+1)<n and row*m + (col+1)      or -1
 
             # print([left, top, right, bottom])
             icount = -1
@@ -162,6 +164,7 @@ def findCanMoveTiles():
 findCanMoveTiles()
 
 def MoveTileToBlank(curTile, blankTile, orientation, curRectCopy):
+    global startMoveFlag   
     if curTile == '':
         return
     if orientation == "down":
@@ -169,7 +172,7 @@ def MoveTileToBlank(curTile, blankTile, orientation, curRectCopy):
             curTile[0].top += 1
         else:
             blankTile[0].top = curRectCopy.top
-            print(curTile, blankTile)
+            startMoveFlag = 0
 
 DISPFIRST = pygame.USEREVENT #创建自定义事件，第一次全部显示供用户记忆
 pygame.time.set_timer(DISPFIRST, 5000)
@@ -177,7 +180,6 @@ pygame.time.set_timer(DISPFIRST, 5000)
 DISPINFOTEXT = pygame.USEREVENT+1 #创建自定义事件，计时
 pygame.time.set_timer(DISPINFOTEXT, 0)
 
-startMoveFlag = 0
 curTile = ''
 curRectCopy = ''
 blankTile = ''
@@ -186,8 +188,16 @@ while True:
     drawBackGround()
     if startMoveFlag:
         MoveTileToBlank(curTile, blankTile, orientation, curRectCopy)
+        #lstTilesBlock[firstIndex],lstTilesBlock[secondIndex] = lstTilesBlock[secondIndex],lstTilesBlock[firstIndex]
 
-
+        #print(lstTilesBlock.index(curTile), '====================')
+    else:
+        print(startMoveFlag)
+        if curTile != "":
+            firstIndex = lstTilesBlock.index(curTile)
+            secondIndex = lstTilesBlock.index(blankTile)
+            lstTilesBlock[firstIndex],lstTilesBlock[secondIndex] = lstTilesBlock[secondIndex],lstTilesBlock[firstIndex]
+    
     mouse_x,mouse_y = -1,-1
     
     events = pygame.event.get()
@@ -234,7 +244,7 @@ while True:
         elif event.type == KEYUP:
             print(event.key, chr(event.key)=='↑', pygame.key.get_mods())
             canMoveTiles = findCanMoveTiles()
-            # print(canMoveTiles)
+            print(canMoveTiles)
             if event.key == K_DOWN:
                 for item in canMoveTiles:
                     if item[2][3] == '1':
