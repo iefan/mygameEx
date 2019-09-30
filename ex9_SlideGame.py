@@ -21,7 +21,7 @@ BLUE  = (0, 0, 255)
 NAVYBLUE = ( 60, 60, 100)
 YELLOW = (255, 255,0)
 
-blockWidth =80 
+blockWidth =100 
 g_ClickCount = -1
 g_TotalSecond = 0
 first_ClickIcon = [0,0]
@@ -34,7 +34,7 @@ curSurface = pygame.display.set_mode((630, 560), 0, 32)
 pygame.display.set_caption("数字华容道")
 
 # fontObj = pygame.font.Font('simsunb.ttf', 32)
-numberFontObj = pygame.font.SysFont("simhei", 30)
+numberFontObj = pygame.font.SysFont("simhei", 36)
 fontObj = pygame.font.SysFont("simhei", 50)
 headTextObj = fontObj.render("数字华容道", True, WHITE, NAVYBLUE)
 headRectObj = headTextObj.get_rect()
@@ -69,8 +69,8 @@ lstRankNameAndTime = []
 flag_Start = 0
 
 def getRankInfo():
-    if os.path.exists('rank.dat'):
-        with open('rank.dat', encoding='utf-8' ) as f:
+    if os.path.exists(r'd:/myprogram/rank.dat'):
+        with open(r'd:/myprogram/rank.dat', encoding='utf-8' ) as f:
             icount = 0
             rankTmpText = infoFontObj.render("排名", True, YELLOW, NAVYBLUE)
             rankTmpRect = rankTmpText.get_rect()
@@ -83,7 +83,7 @@ def getRankInfo():
                 if len(irank) == 0:
                     break
                 tmpname,tmpsecond = irank.split(',')
-                print(tmpsecond, type(tmpsecond))
+                # print(tmpsecond, type(tmpsecond))
                 lstRankNameAndTime.append([int(tmpsecond[:-1]), tmpname])
 
                 rankTmpText = infoFontObj.render(irank, True, YELLOW, NAVYBLUE)
@@ -95,30 +95,29 @@ getRankInfo()
 
 m = 4
 n = 4
-lstBlockRect = [[0 for i in range(m)] for j in range(n)]
+lstTilesBlock = [0 for i in range(m*n)] 
 #lstBlockFlag = [[0 for i in range(m)] for j in range(n)]
 #lstBlockFlag_OVER = [[1 for i in range(m)] for j in range(n)]
 def generatePos():
-    for i in range(m):
-        for j in range(n):
-            lstBlockRect[i][j] = [pygame.Rect(80+i*(blockWidth+5),110+j*(blockWidth+5), blockWidth, blockWidth), i*m+j+1, '0000']
+    for i in range(m*n):
+        row = i // m
+        col = i % m
+        lstTilesBlock[i] = [pygame.Rect(70+col*(blockWidth+5),110+row*(blockWidth+5), blockWidth, blockWidth), i+1, '0000']
 
-generatePos() #生成所有图标的位置数据
-## print(lstBlockRect)
-
+generatePos() #生成所有棋子的位置数据
 
 #绘制背景
 def drawBackGround():
     curSurface.fill(NAVYBLUE)
-    for i in range(m):
-        for j in range(n):
-                curblock = lstBlockRect[i][j]
-                pygame.draw.rect(curSurface, GREEN, curblock[0])
-                tmpNumber = numberFontObj.render(str(curblock[1]), True, WHITE, GREEN)
-                tmpNumberRect = tmpNumber.get_rect()
-                tmpNumberRect.center = (curblock[0].left+ blockWidth/2, curblock[0].top+ blockWidth/2)
-                curSurface.blit(tmpNumber, tmpNumberRect)
+    for i in range(m*n-1):
+        curblock = lstTilesBlock[i]
+        pygame.draw.rect(curSurface, GREEN, curblock[0])
+        tmpNumber = numberFontObj.render(str(curblock[1]), True, WHITE, GREEN)
+        tmpNumberRect = tmpNumber.get_rect()
+        tmpNumberRect.center = (curblock[0].left+ blockWidth/2, curblock[0].top+ blockWidth/2)
+        curSurface.blit(tmpNumber, tmpNumberRect)
 
+    pygame.draw.rect(curSurface, YELLOW, [65, 105, 425, 425],7)
     curSurface.blit(headTextObj, headRectObj)
     curSurface.blit(infoTextObj, infoRectObj)
     curSurface.blit(infoTextObj2, infoRectObj2)
@@ -130,6 +129,34 @@ def drawBackGround():
     for irankinfo in lstRankInfo:
         curSurface.blit(irankinfo[0], irankinfo[1])
 
+
+def printTile(pos):
+    for i in range(m*n):
+        if lstTilesBlock[i][0].collidepoint(pos):
+            print(lstTilesBlock[i][1], lstTilesBlock[i][2])
+
+def findCanMoveTiles():
+    for i in range(m*n):
+        lstTilesBlock[i][2] = '0000' #左上右下标志
+        if lstTilesBlock[i][1] == 16: #找到空格
+            row = i//m
+            col = i % n
+            top     = (row-1)>=0  and (row-1)*m+col      or -1
+            bottom  = (row+1)<m and (row+1)*m+col      or -1
+            left    = (col-1)>=0  and row*m + (col-1)    or -1
+            right   = (col+1)<n and row*m + (col+1)    or -1
+
+            # print([left, top, right, bottom])
+            icount = -1
+            for item in [right, bottom, left, top]:
+                icount += 1
+                if item!=-1:
+                    tmp = list(lstTilesBlock[item][2])
+                    tmp[icount] = '1'
+                    lstTilesBlock[item][2] = ''.join(tmp)
+                    print(lstTilesBlock[item][1], lstTilesBlock[item][2])
+
+findCanMoveTiles()
 
 DISPFIRST = pygame.USEREVENT #创建自定义事件，第一次全部显示供用户记忆
 pygame.time.set_timer(DISPFIRST, 5000)
@@ -156,6 +183,7 @@ while True:
             sys.exit()
         elif event.type == MOUSEBUTTONUP:
             mouse_x, mouse_y = event.pos
+            printTile(event.pos)
             # print(mouse_x, mouse_y)
         elif event.type == DISPFIRST:
             if flag_Start == 1:
@@ -181,7 +209,7 @@ while True:
                 for  isecond, iname in lstRankNameAndTime[:3]:
                     rankInfoStr += iname + "," + str(isecond) + '秒\n'
 
-                with open('rank.dat', 'w') as f:
+                with open(r'd:/myprogram/rank.dat', 'w') as f:
                     f.write(rankInfoStr)
 
                 lstRankNameAndTime = []
