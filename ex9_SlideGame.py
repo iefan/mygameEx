@@ -24,8 +24,8 @@ YELLOW = (255, 255,0)
 blockWidth =100 
 g_ClickCount = -1
 g_TotalSecond = 0
-first_ClickIcon = [0,0]
-second_ClickIcon = [0,0]
+# first_ClickIcon = [0,0]
+# second_ClickIcon = [0,0]
 g_USERNAME = "psy"
 # g_BlankTileBlock = 15
 g_LastBlankBlock = '' #当前空位
@@ -45,12 +45,12 @@ headRectObj = headTextObj.get_rect()
 headRectObj.center = (300, 50)
 
 infoFontObj = pygame.font.SysFont("simhei", 16)
-infoTextObj = infoFontObj.render("点击次数：", True, YELLOW, NAVYBLUE)
+infoTextObj = infoFontObj.render("移动步数", True, YELLOW, NAVYBLUE)
 infoRectObj = infoTextObj.get_rect()
-infoRectObj.center = (580, 100)
-infoTextObj2 = infoFontObj.render("0次", True, YELLOW, NAVYBLUE)
+infoRectObj.center = (580, 120)
+infoTextObj2 = infoFontObj.render("0步", True, YELLOW, NAVYBLUE)
 infoRectObj2 = infoTextObj2.get_rect()
-infoRectObj2.center = (580, 130)
+infoRectObj2.center = (580, 150)
 
 infoTextObj3 = infoFontObj.render("计  时", True, YELLOW, NAVYBLUE)
 infoRectObj3 = infoTextObj3.get_rect()
@@ -62,7 +62,7 @@ infoRectObj4.center = (580, 230)
 
 infoHelpText = infoFontObj.render("按回车开始", True, YELLOW, NAVYBLUE)
 infoHelpRect = infoHelpText.get_rect()
-infoHelpRect.center = (570, 260)
+infoHelpRect.center = (575, 270)
 
 nameText = infoFontObj.render("玩家：", True, WHITE, NAVYBLUE)
 nameRect = nameText.get_rect()
@@ -121,8 +121,7 @@ def inverse_number(lstnumber):
 def generatePos(flagRight = 0):
     global g_LastBlankBlock
     lstNum = list(range(1, 16))
-    # random.shuffle(lstNum)
-    # for ii in range(10):
+ 
     if flagRight == 1:
         random.shuffle(lstNum)
         while inverse_number(lstNum)%2 != 0:
@@ -199,7 +198,8 @@ def findCanMoveTiles():
     return lstCanMoveTile
 
 def MoveTileToBlank():
-    global g_startMoveFlag, g_keyLock, g_mouseLock, g_LastBlankBlock, g_curTile, g_orientation, g_canMoveTiles
+    global g_startMoveFlag,g_ClickCount, g_keyLock, g_mouseLock, g_LastBlankBlock, g_curTile, g_orientation, g_canMoveTiles
+    # global infoRectObj2, infoFontObj, infoRectObj2
     if g_curTile == '':
         return
     flag_moveEnd = 0
@@ -232,12 +232,17 @@ def MoveTileToBlank():
         g_startMoveFlag = 0
         g_keyLock = 1 #解锁按键
         g_mouseLock = 1
+        g_ClickCount += 1
+        # print(g_ClickCount)
 
         firstIndex = lstTilesBlock.index(g_curTile)
         secondIndex = lstTilesBlock.index(g_LastBlankBlock)
         lstTilesBlock[firstIndex],lstTilesBlock[secondIndex] = lstTilesBlock[secondIndex],lstTilesBlock[firstIndex]
         # print(lstTilesBlock)
         g_canMoveTiles = findCanMoveTiles()
+
+        
+        # curSurface.blit(infoTextObj2, infoRectObj2)
         # print('canMoveTiles', g_canMoveTiles)
 
 def setMoveState(item, flag_exit_move, orientation):
@@ -263,12 +268,14 @@ g_keyLock = 1
 g_mouseLock = 1
 
 def StartGameSet(flag_qishi=0): 
-    global g_GAMESTART, g_canMoveTiles, lstTilesBlock, g_startMoveFlag, g_keyLock, g_mouseLock, lstRankInfo, lstRankNameAndTime
+    global g_GAMESTART,g_TotalSecond,g_ClickCount, g_canMoveTiles, lstTilesBlock, g_startMoveFlag, g_keyLock, g_mouseLock, lstRankInfo, lstRankNameAndTime
     lstRankInfo = []
     lstRankNameAndTime = []
     g_startMoveFlag = 0
     g_keyLock = 1
     g_mouseLock = 1
+    g_TotalSecond = 0
+    g_ClickCount = 1
 
     getRankInfo()
     lstTilesBlock = [0 for i in range(m*n)] 
@@ -284,9 +291,7 @@ while True:
     drawBackGround()
     if g_startMoveFlag:
         MoveTileToBlank()
-                    
-    # mouse_x,mouse_y = -1,-1
-    
+  
     events = pygame.event.get()
     for event in events:
         if event.type == QUIT:
@@ -313,6 +318,11 @@ while True:
                             orientation = K_DOWN
                         
                         setMoveState(item, flag_exit_move, orientation)
+                        if flag_exit_move == 1:
+                            infoTextObj2 = infoFontObj.render(str(g_ClickCount)+"步", True, YELLOW, NAVYBLUE)
+                            infoRectObj2 = infoTextObj2.get_rect()
+                            infoRectObj2.center = (580, 150)
+                        # print(infoRectObj2)
                     
             # print(mouse_x, mouse_y)
         
@@ -321,6 +331,11 @@ while True:
             g_TotalSecond += 1
             infoRectObj4 = infoTextObj4.get_rect()
             infoRectObj4.center = (580, 230)
+
+            # infoTextObj2 = infoFontObj.render(str(g_ClickCount)+"次", True, YELLOW, NAVYBLUE)
+            # g_TotalSecond += 1
+            # infoRectObj2 = infoTextObj4.get_rect()
+            # infoRectObj2.center = (580, 130)
 
             #程序结束
             overStr = ""
@@ -381,6 +396,10 @@ while True:
                             break
                 # print('item', item)
                 setMoveState(item, flag_exit_move, event.key)
+                if flag_exit_move == 1:
+                    infoTextObj2 = infoFontObj.render(str(g_ClickCount)+"步", True, YELLOW, NAVYBLUE)
+                    infoRectObj2 = infoTextObj2.get_rect()
+                    infoRectObj2.center = (580, 150)
             # if item != "" and flag_exit_move == 1:  
             #     g_curTile = item
             #     g_orientation = event.key         
@@ -393,9 +412,9 @@ while True:
                 g_GAMESTART = 1
                 pygame.time.set_timer(COUNTTIMER, 1000) #启动游戏
                 
-                infoTextObj2 = infoFontObj.render("0次", True, YELLOW, NAVYBLUE)
-                infoRectObj2 = infoTextObj2.get_rect()
-                infoRectObj2.center = (580, 130)
+                # infoTextObj2 = infoFontObj.render("0次", True, YELLOW, NAVYBLUE)
+                # infoRectObj2 = infoTextObj2.get_rect()
+                # infoRectObj2.center = (580, 130)
       
     # textinput.update(events)
     if textinput.update(events):
