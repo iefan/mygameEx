@@ -260,7 +260,7 @@ def StartGameSet(flag_qishi=0):
     g_Lst_GuessResult.clear()
     
     pygame.time.set_timer(COUNTTIMER, 1000)
-    print(g_GUESSNUMBERLIST)
+    # print(g_GUESSNUMBERLIST)
     
 
 
