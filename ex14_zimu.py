@@ -122,6 +122,7 @@ def changeAlpha():
     for item in g_BGRECT[:4]:
         random.shuffle(g_StrAlpha)
         ialpha = g_StrAlpha[g_Count]
+        ## 根据不同位置将相关文字固定
         if g_Count >= g_ALPHANUMS[len(g_FONTRECT)]:
             tmpFontText = fontObj.render(str_DispWords[len(g_FONTRECT)], True, WHITE, BLACK)
         else:
