@@ -42,7 +42,7 @@ headRectObj.center = (300, 50)
 
 infoFontObj = pygame.font.SysFont("simhei", 18)
 infoAreaTop = 100
-infoAreaLeft = 530
+infoAreaLeft = 510
 infoTextObj1 = infoFontObj.render("成功次数", True, YELLOW, NAVYBLUE)
 infoRectObj1 = infoTextObj1.get_rect()
 infoRectObj1.top = infoAreaTop + 10
@@ -53,20 +53,20 @@ infoRectObj2 = infoTextObj2.get_rect()
 infoRectObj2.top = infoRectObj1.bottom + 10
 infoRectObj2.left = infoAreaLeft
 
-infoTextObj3 = infoFontObj.render("计  时", True, YELLOW, NAVYBLUE)
-infoRectObj3 = infoTextObj3.get_rect()
-infoRectObj3.top = infoRectObj2.bottom + 30
-infoRectObj3.left = infoAreaLeft
+# infoTextObj3 = infoFontObj.render("计  时", True, YELLOW, NAVYBLUE)
+# infoRectObj3 = infoTextObj3.get_rect()
+# infoRectObj3.top = infoRectObj2.bottom + 30
+# infoRectObj3.left = infoAreaLeft
 
-infoTextObj4 = infoFontObj.render("0秒", True, YELLOW, NAVYBLUE)
-infoRectObj4 = infoTextObj4.get_rect()
-infoRectObj4.top = infoRectObj3.bottom + 10
-infoRectObj4.left = infoAreaLeft
-# infoRectObj4.center = (580, 230)
+# infoTextObj4 = infoFontObj.render("0秒", True, YELLOW, NAVYBLUE)
+# infoRectObj4 = infoTextObj4.get_rect()
+# infoRectObj4.top = infoRectObj3.bottom + 10
+# infoRectObj4.left = infoAreaLeft
+# # infoRectObj4.center = (580, 230)
 
 infoHelpText = infoFontObj.render("按回车开始", True, YELLOW, NAVYBLUE)
 infoHelpRect = infoHelpText.get_rect()
-infoHelpRect.top = infoRectObj4.bottom + 30
+infoHelpRect.top = infoRectObj2.bottom + 30
 infoHelpRect.left = infoAreaLeft
 # infoHelpRect.center = (575, 270)
 
@@ -81,59 +81,101 @@ rankTmpRect = rankTmpText.get_rect()
 rankTmpRect.left = infoAreaLeft
 rankTmpRect.top = nameRect.bottom + 80
 
+successText = infoFontObj.render("提示", True, YELLOW, NAVYBLUE)
+successRect = successText.get_rect()
+successRect.left = infoAreaLeft
+successRect.top = 480
+
 BEEP1 = pygame.mixer.Sound('sound/beep1.ogg')
+BEEP2 = pygame.mixer.Sound('sound/beep2.ogg')
+BEEP3 = pygame.mixer.Sound('sound/beep3.ogg')
+BEEP4 = pygame.mixer.Sound('sound/beep4.ogg')
 
-def getRankInfo():
-    if os.path.exists(r'rankSim.dat'):
-        with open(r'rankSim.dat', encoding='utf-8' ) as f:
-            icount = 0
-            rankTmpText = infoFontObj.render("排名", True, YELLOW, NAVYBLUE)
-            rankTmpRect = rankTmpText.get_rect()
-            rankTmpRect.center = (570, 400+icount*30)
-            lstRankInfo.append([rankTmpText, rankTmpRect])
-            # print(f.readlines())
-            for irank in f.readlines():
-                icount += 1
-                irank = irank.strip()
-                if len(irank) == 0:
-                    break
-                tmpname,tmpsecond = irank.split(',')
-                # print(tmpsecond, type(tmpsecond))
-                lstRankNameAndTime.append([int(tmpsecond[:-1]), tmpname])
+lstRankInfo = []
+lstRankNameAndTime = []
+def getRankInfo(flag = "read"):
+    global lstRankInfo, lstRankNameAndTime
+    if flag == 'read':
+        lstRankNameAndTime = []
+        if os.path.exists(r'rankSim.dat'):
+            with open(r'rankSim.dat', encoding='utf-8' ) as f:
+                icount = 0
+                
+                for irank in f.readlines():
+                    
+                    irank = irank.strip()
+                    if len(irank) == 0:
+                        break
+                    tmpsecond, tmpname = irank.split(',')
+                    # print(tmplevel, type(g_TotalPieNums))
+                    lstRankNameAndTime.append([int(tmpsecond), tmpname])
+                
+                lstRankInfo = []
+                lstRankNameAndTime.sort(reverse=True)
+                firstThreeName = []
+                for item in lstRankNameAndTime:
+                    if item[1] not in firstThreeName and len(firstThreeName)<3:
+                        firstThreeName.append(item[1])
+                    else:
+                        continue
 
-                rankTmpText = infoFontObj.render(irank, True, YELLOW, NAVYBLUE)
-                rankTmpRect = rankTmpText.get_rect()
-                rankTmpRect.center = (570, 400+icount*30)
-                lstRankInfo.append([rankTmpText, rankTmpRect])
+                    icount += 1
+                    rankTmpText = infoFontObj.render(item[1]+":"+str(item[0])+"次", True, YELLOW, NAVYBLUE)
+                    rankTmpRect = rankTmpText.get_rect()
+                    rankTmpRect.left = infoAreaLeft
+                    rankTmpRect.top = nameRect.bottom + 80 +icount*25
+                    lstRankInfo.append([rankTmpText, rankTmpRect])
+                    # print(lstRankNameAndTime)
+              
+    elif flag=="write":
+        if g_COUNT_SUCCESS>0:
+            lstRankNameAndTime.append([g_COUNT_SUCCESS, g_USERNAME])
+            lstRankNameAndTime.sort(reverse=True)
+            rankInfoStr = ""
+            for item in lstRankNameAndTime:
+                rankInfoStr += str(item[0]) + "," + item[1] + '\n'
+            with open(r'rankSim.dat', 'w', encoding='utf-8' ) as f:
+                f.write(rankInfoStr)
+
+            getRankInfo()
 
 
 
 g_lstBlockRect = []
+g_BEEP_FLAG = []
 def generatePos(flagRight = 0):
     g_lstBlockRect.clear()
 
     blocktop = 100
-    blockleft = 80
+    blockleft = 60
     blockwidth = 200 
 
     for i in range(2):
         for j in range(2):
             g_lstBlockRect.append(pygame.Rect(blockleft+j*blockwidth, blocktop+i*blockwidth, blockwidth, blockwidth))
 
-g_slashcount = 0
+g_Beep_Index = 0
 #绘制背景
 def drawBackGround(slash = 0):
-    global g_slashcount
+    global g_slashcount, g_lstslash, BEEP1, BEEP2, BEEP3, BEEP4, g_BEEP_FLAG, g_Beep_Index
     curSurface.fill(NAVYBLUE)
     
+    # lstBeep = [BEEP1, BEEP2, BEEP3, BEEP4]
     lstColor = [YELLOW_D, RED_D, GREEN_D, WHITE_D]
     lstColor2 = [YELLOW, RED, GREEN, WHITE]
     for i in range(4):
         if slash == 0:
             pygame.draw.rect(curSurface, lstColor[i], g_lstBlockRect[i])
-        elif slash == 1:
-            print('-----', i, g_slashcount)
-            if i==g_slashcount:
+        elif slash == 1 or slash == 2:
+
+            if g_lstslash[i]==1:
+                # print(g_Beep_Index, g_BEEP_FLAG, i, g_lstslash, gg_lstslashAll.index(g_lstslash))
+                # # ibeepindex = gg_lstslashAll.index(g_lstslash)
+                # if g_Beep_Index < len(g_BEEP_FLAG):
+                #     if slash == 1 and g_BEEP_FLAG[g_Beep_Index] != -1 :
+                #         lstBeep[g_BEEP_FLAG[g_Beep_Index]].play()
+                #         g_BEEP_FLAG[g_Beep_Index] = -1
+                #         g_Beep_Index += 1
                 pygame.draw.rect(curSurface, lstColor2[i], g_lstBlockRect[i])
             else:
                 pygame.draw.rect(curSurface, lstColor[i], g_lstBlockRect[i])
@@ -141,124 +183,174 @@ def drawBackGround(slash = 0):
     curSurface.blit(headTextObj, headRectObj)
     curSurface.blit(infoTextObj1, infoRectObj1)
     curSurface.blit(infoTextObj2, infoRectObj2)
-    curSurface.blit(infoTextObj3, infoRectObj3)
-    curSurface.blit(infoTextObj4, infoRectObj4)
+    # curSurface.blit(infoTextObj3, infoRectObj3)
+    # curSurface.blit(infoTextObj4, infoRectObj4)
     curSurface.blit(infoHelpText, infoHelpRect)
     curSurface.blit(nameText, nameRect)
-    curSurface.blit(textinput.get_surface(), (540, 340))
+    curSurface.blit(successText, successRect)
+    curSurface.blit(rankTmpText, rankTmpRect)
+    curSurface.blit(textinput.get_surface(), (540, nameRect.bottom+10))
 
+    for irankinfo in lstRankInfo:
+        curSurface.blit(irankinfo[0], irankinfo[1])
 
+def genRandlist(n=5):
+    global g_CurSn
+    lstbeepFlag = []
+    g_CurSn = ''
+    # n = 5
+    lstrandslash = []
+    for i in range(n):
+        tmp = [0,0,0,0]
+        tmpint = random.randint(0,3)
+        lstbeepFlag.append(tmpint)
+
+        tmp[tmpint] = 1
+        g_CurSn += str(pow(2, tmpint)) #将每一次显示转换为对应的十进制
+        lstrandslash.append(tmp.copy())
+        lstrandslash.append([0,0,0,0])
+        # print(lstrandslash)
+    lstrandslash.append([0,0,0,0])
+    return [lstrandslash.copy(), lstbeepFlag.copy()]
+
+# genRandlist()
 def StartGameSet(flag_qishi=0):
-    global g_GAMESTART, COUNTTIMER
+    global successText, g_BEEP_FLAG, g_GAMESTART, COUNTTIMER, g_Slash, g_slashcount,g_lstslash, g_CurSn,g_CurSn_user,gg_lstslashAll, g_COUNT_SUCCESS
     generatePos()
-    g_GAMESTART = 0
+    g_GAMESTART = flag_qishi
+    getRankInfo()
+    g_Slash = 0
+    g_slashcount = 0
+    g_lstslash = [0,0,0,0]
+    g_CurSn = ''
+    g_CurSn_user = ''
+    gg_lstslashAll = []
+    g_BEEP_FLAG = []
+    g_COUNT_SUCCESS = 0
+    successText = infoFontObj.render("提示", True, YELLOW, NAVYBLUE)
     
 g_GAMESTART = 0
 
 COUNTTIMER = pygame.USEREVENT
 pygame.time.set_timer(COUNTTIMER, 0)
+TIMERUSERDISP = pygame.USEREVENT+1 #用来显示玩家点击时亮度设置
+pygame.time.set_timer(TIMERUSERDISP, 0)
+GAMETIMER = pygame.USEREVENT+2
+pygame.time.set_timer(GAMETIMER, 0)
 
 StartGameSet()
 g_Slash = 0
+g_slashcount = 0
+g_lstslash = [0,0,0,0]
+g_CurSn = ''
+g_CurSn_user = ''
+gg_lstslashAll = []
+g_COUNT_SUCCESS = 0
+g_GAME_CONTROL_LIST = list(range(1,21))*2
+g_GAME_CONTROL_LIST.sort()
 while True:
     drawBackGround(g_Slash)
-    # if g_startMoveFlag:
-    #     MoveTileToBlank()
   
     events = pygame.event.get()
     for event in events:
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
-    #     elif event.type == MOUSEBUTTONUP:
-    #         # mouse_x, mouse_y = event.pos
-    #         # printTile(event.pos)
-    #         if g_GAMESTART == 1:
-    #             flag_exit_move = 0
-    #             for item in lstTilesBlock:                
-    #                 if item[0].collidepoint(event.pos) and (item in g_canMoveTiles) and g_mouseLock==1:
-    #                     if item[2] == '1000':
-    #                         flag_exit_move = 1
-    #                         orientation = K_LEFT
-    #                     elif item[2] == '0100':
-    #                         flag_exit_move = 1
-    #                         orientation = K_UP
-    #                     elif item[2] == '0010':
-    #                         flag_exit_move = 1
-    #                         orientation = K_RIGHT
-    #                     elif item[2] == '0001':
-    #                         flag_exit_move = 1
-    #                         orientation = K_DOWN
-                        
-    #                     setMoveState(item, flag_exit_move, orientation)
-    #                     if flag_exit_move == 1:
-    #                         infoTextObj2 = infoFontObj.render(str(g_ClickCount)+"步", True, YELLOW, NAVYBLUE)
-    #                         infoRectObj2 = infoTextObj2.get_rect()
-    #                         infoRectObj2.center = (580, 150)
-    #                     # print(infoRectObj2)
+
+        elif event.type == GAMETIMER:
+            g_lstslash = [0,0,0,0]
+            if g_GAMESTART == 1:
+                g_GAMESTART = 0
+                g_COUNT_SUCCESS = 0
+                pygame.time.set_timer(COUNTTIMER, 0)
+                pygame.time.set_timer(TIMERUSERDISP, 0)
+                pygame.time.set_timer(GAMETIMER, 0)
+                print("false", )
+                successText = infoFontObj.render("超时挑战失败！", True, RED, NAVYBLUE)
+                getRankInfo('write')
+
+                # g_Slash = 1
+                # g_slashcount = 0
+                # pygame.time.set_timer(COUNTTIMER, 300) #开启新一轮
+            pygame.time.set_timer(GAMETIMER, 0) #结束当前
+
+        elif event.type == TIMERUSERDISP:
+            g_lstslash = [0,0,0,0]
+            g_Slash == 2
+            if len(g_CurSn) == len(g_CurSn_user):
+                if g_CurSn == g_CurSn_user:
+                    g_COUNT_SUCCESS += 1
+                    infoTextObj2 = infoFontObj.render(str(g_COUNT_SUCCESS)+"次", True, YELLOW, NAVYBLUE)
                     
-    #         # print(mouse_x, mouse_y)
+                    successText = infoFontObj.render("恭喜，成功！", True, YELLOW, NAVYBLUE)
+                    pygame.time.set_timer(COUNTTIMER, 300)
+                    pygame.time.set_timer(GAMETIMER, 0)
+
+                    print("true!")
+                else:
+                    g_GAMESTART = 0
+                    g_COUNT_SUCCESS = 0
+                    pygame.time.set_timer(COUNTTIMER, 0)
+                    pygame.time.set_timer(TIMERUSERDISP, 0)
+                    pygame.time.set_timer(GAMETIMER, 0)
+                    print("false", )
+                    successText = infoFontObj.render("遗憾，失败！", True, RED, NAVYBLUE)
+                    getRankInfo('write')
+                    
+
+                g_Slash = 1
+                g_CurSn_user = ''
+            pygame.time.set_timer(TIMERUSERDISP, 0)
+
+        elif event.type == MOUSEBUTTONUP:
+    #         # mouse_x, mouse_y = event.pos
+            if g_GAMESTART == 1 and g_Slash == 2: #当显示结束才可以点击
+                g_lstslash = [0,0,0,0]
+                for i in range(4):                
+                    if g_lstBlockRect[i].collidepoint(event.pos):
+                        g_CurSn_user += str(pow(2,i))
+                        g_lstslash[i] = 1
+                        pygame.time.set_timer(TIMERUSERDISP, 300)
+                        g_Slash == 1
+                print(g_CurSn, g_CurSn_user, g_CurSn==g_CurSn_user, g_lstslash)
+                
         
         elif event.type == COUNTTIMER:
             # drawBackGround(1)
-            g_Slash = 0
-            g_slashcount += 1
-            print(g_slashcount, '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-            if g_slashcount == 4:
+            # g_Slash = 0
+            if g_slashcount == 0 and g_Slash == 1:
+                [gg_lstslashAll, g_BEEP_FLAG ]= genRandlist(g_GAME_CONTROL_LIST[g_COUNT_SUCCESS]) #新一轮游戏
+                g_Slash = 1
+                g_lstslash = [0,0,0,0]
+                g_Beep_Index = 0
+                # g_BEEP_FLAG = [0]*len(gg_lstslashAll)
+
+            if g_slashcount<len(gg_lstslashAll) and g_Slash==1:
+                g_lstslash = gg_lstslashAll[g_slashcount]
+                # print(g_slashcount, g_lstslash)
+                g_slashcount += 1
+                
+            else:
+                g_Slash = 2 #开始玩家点击
                 g_slashcount = 0
-    #        pygame.time.set_timer(COUNTTIMER, 0) 
+                g_lstslash = [0,0,0,0]
+                pygame.time.set_timer(COUNTTIMER, 0)
+                # print(gg_lstslashAll, len(gg_lstslashAll))
+                pygame.time.set_timer(GAMETIMER, len(gg_lstslashAll)*800) #启动游戏
 
-    #         infoTextObj4 = infoFontObj.render(str(g_TotalSecond)+"秒", True, YELLOW, NAVYBLUE)
-    #         g_TotalSecond += 1
-    #         infoRectObj4 = infoTextObj4.get_rect()
-    #         infoRectObj4.center = (580, 230)
-
-    #         # infoTextObj2 = infoFontObj.render(str(g_ClickCount)+"次", True, YELLOW, NAVYBLUE)
-    #         # g_TotalSecond += 1
-    #         # infoRectObj2 = infoTextObj4.get_rect()
-    #         # infoRectObj2.center = (580, 130)
-
-    #         #程序结束
-    #         overStr = ""
-    #         overFinaly = ''.join('%s' % id for id in range(1,17))
-    #         for item in lstTilesBlock:
-    #             overStr += str(item[1])
-    #         # print(overStr)
-    #         # print(overFinaly)
-    #         if overStr == overFinaly:
-    #             g_GAMESTART = 0
-    #             # print(lstBlockFlag)
-    #             pygame.time.set_timer(COUNTTIMER, 0) #全部选完关闭计时
-
-    #             lstRankNameAndTime.append([g_TotalSecond-1, g_USERNAME])
-    #             lstRankNameAndTime.sort()
-    #             rankInfoStr = ""
-    #             tmplstrankname = []
-    #             for  isecond, iname in lstRankNameAndTime:
-    #                 if (iname not in tmplstrankname) and len(tmplstrankname)<=3:
-    #                     tmplstrankname.append(iname)
-    #                     rankInfoStr += iname + "," + str(isecond) + '秒\n'
-
-    #             with open(r'rankSim.dat', 'w', encoding='utf-8' ) as f:
-    #                 f.write(rankInfoStr)
-
-    #             lstRankNameAndTime = []
-    #             getRankInfo() #调用最新排名
-                    
-    #         # print(g_TotalSecond)
+            # # print(g_slashcount, '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+           
 
         elif event.type == KEYUP:
             print(event.key, chr(event.key)=='↑', pygame.key.get_mods())
-            if event.key == 13: #重新开始
+            if event.key == 13: #回车开始
+                StartGameSet(1)
+                g_COUNT_SUCCESS = 0
+                infoTextObj2 = infoFontObj.render(str(g_COUNT_SUCCESS)+"次", True, YELLOW, NAVYBLUE)
+
                 g_Slash = 1
-                
-    #             StartGameSet(1)
-    #             g_GAMESTART = 1
-                pygame.time.set_timer(COUNTTIMER, 3000) #启动游戏
-                
-    #             # infoTextObj2 = infoFontObj.render("0次", True, YELLOW, NAVYBLUE)
-    #             # infoRectObj2 = infoTextObj2.get_rect()
-    #             # infoRectObj2.center = (580, 130)
+                pygame.time.set_timer(COUNTTIMER, 300) #启动游戏
+   
       
     # # textinput.update(events)
     if textinput.update(events):
