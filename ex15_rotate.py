@@ -9,7 +9,7 @@ os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (pos_x,pos_y) #设置窗口起始
 
 pygame.init()
 
-FPS = 15
+FPS = 20
 fpsClock = pygame.time.Clock()
 #设置颜色
 BLACK = (0, 0, 0)
@@ -33,6 +33,16 @@ WINDOWHEIGHT = 480
 
 curSurface = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT), 0, 32)
 pygame.display.set_caption("旋转字符") 
+TimerEvent1 = pygame.USEREVENT
+pygame.time.set_timer(TimerEvent1, 0)
+
+g_Fontsize = 60
+g_fontObj = pygame.font.SysFont("simhei", g_Fontsize)
+g_titleSurf2 = g_fontObj.render("抖动旋转", True, GREEN, NAVYBLUE)
+
+g_zoom_flag = 1
+g_scale = 1.2
+
 
 def terminate():
     pygame.quit()
@@ -44,6 +54,27 @@ def drawPressKeyMsg():
     pressKeyRect = pressKeySurf.get_rect()
     pressKeyRect.topleft = (WINDOWWIDTH-140, WINDOWHEIGHT-20)
     curSurface.blit(pressKeySurf, pressKeyRect)
+
+def checkUserEvent():
+    global g_Fontsize, g_fontObj, g_titleSurf2
+    userEvents = pygame.event.get(TimerEvent1)
+    if len(userEvents) == 0:
+        return None
+    # if g_Fontsize > 30:
+    #     g_Fontsize -= 2
+    # else:
+    #     g_Fontsize = 60
+
+    if g_zoom_flag == 1:
+        if g_Fontsize > 30 : 
+            g_Fontsize -= 2            
+    else:
+        if g_Fontsize < 60 : 
+            g_Fontsize += 2
+    
+    g_fontObj = pygame.font.SysFont("simhei", g_Fontsize)
+    g_titleSurf2 = g_fontObj.render("抖动旋转", True, GREEN, YELLOW)
+
 
 def checkForKeyPress():
     if len(pygame.event.get(QUIT))>0:
@@ -58,26 +89,40 @@ def checkForKeyPress():
     return keyUpEvents[0].key
 
 def showStartScreen():
-    fontObj = pygame.font.SysFont("simhei", 100)
-    titleSurf1 = fontObj.render("旋转字符", True, WHITE, NAVYBLUE)
-    titleSurf2 = fontObj.render("旋转字符", True, GREEN, NAVYBLUE)
+    # Once the font is created the size cannot be changed.
+    global  g_titleSurf1, g_titleSurf2, g_zoom_flag, g_scale
+    fontObj = pygame.font.SysFont("simhei", 80)
+    titleSurf1 = fontObj.render("平滑旋转", True, WHITE, NAVYBLUE)
+    titleSurf3 = fontObj.render("平滑旋转", True, WHITE, GREEN)
+    # titleSurf2 = fontObj.render("旋转字符", True, GREEN, NAVYBLUE)
+
+    pygame.time.set_timer(TimerEvent1, 100)
     
     degrees1 = 0
     degrees2 = 0
+    degrees3 = 0
+    
 
     while True:
         curSurface.fill(NAVYBLUE)
-        rotatedSurf1 = pygame.transform.rotate(titleSurf1, degrees1)
+        rotatedSurf1 = pygame.transform.rotozoom(titleSurf1, degrees1, g_scale)
         rotatedRect1 = rotatedSurf1.get_rect()
-        rotatedRect1.center = (WINDOWWIDTH//2, WINDOWHEIGHT // 2) 
+        rotatedRect1.center = (WINDOWWIDTH//6*2, WINDOWHEIGHT // 6*2) 
         curSurface.blit(rotatedSurf1, rotatedRect1) 
-        
-        rotatedSurf2 = pygame.transform.rotate(titleSurf2, degrees2)
+
+        rotatedSurf2 = pygame.transform.rotate(g_titleSurf2, degrees2)
         rotatedRect2 = rotatedSurf2.get_rect()
         rotatedRect2.center = (WINDOWWIDTH//2, WINDOWHEIGHT // 2) 
         curSurface.blit(rotatedSurf2, rotatedRect2) 
+
+        rotatedSurf3 = pygame.transform.rotozoom(titleSurf3, degrees3, g_scale)
+        rotatedRect3 = rotatedSurf3.get_rect()
+        rotatedRect3.center = (WINDOWWIDTH//6*4, WINDOWHEIGHT // 6*4) 
+        curSurface.blit(rotatedSurf3, rotatedRect3) 
         
         drawPressKeyMsg()
+
+        checkUserEvent()
 
         if checkForKeyPress():
             pygame.event.get()
@@ -87,8 +132,25 @@ def showStartScreen():
         pygame.display.update()
         fpsClock.tick(FPS)
 
-        degrees1 += 3
-        degrees2 += 7
+        # degrees1 += 3
+        degrees2 += 3
+        
+        if g_zoom_flag == 1:
+            if g_scale > 0.2 : 
+                g_scale -= 0.01
+                degrees1 += 3
+                degrees3 += 3
+            else:
+                g_zoom_flag = 0               
+        else:
+            if g_scale < 1.2 :
+                g_scale += 0.01
+                degrees1 -= 3
+                degrees3 += 3
+            else:
+                g_zoom_flag = 1
+            
+
 
 def main():
     showStartScreen()
