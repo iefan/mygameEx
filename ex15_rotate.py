@@ -105,7 +105,7 @@ def showStartScreen():
 
     while True:
         curSurface.fill(NAVYBLUE)
-        rotatedSurf1 = pygame.transform.rotozoom(titleSurf1, degrees1, g_scale)
+        rotatedSurf1 = pygame.transform.rotozoom(titleSurf1, degrees3, g_scale)
         rotatedRect1 = rotatedSurf1.get_rect()
         rotatedRect1.center = (WINDOWWIDTH//6*2, WINDOWHEIGHT // 6*2) 
         curSurface.blit(rotatedSurf1, rotatedRect1) 
