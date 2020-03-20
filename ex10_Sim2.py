@@ -3,6 +3,7 @@ import pygame, sys, random, math
 from pygame.locals import *
 import os
 import pygame_textinput
+current_dir = os.path.dirname(os.path.abspath(__file__)) + os.sep
 
 pos_x = 100
 pos_y = 100
@@ -32,13 +33,19 @@ g_USERNAME = "psy"
 textinput = pygame_textinput.TextInput(initial_string=g_USERNAME, font_size=24, text_color=WHITE, font_family="simhei")
 
 curSurface = pygame.display.set_mode((630, 560), 0, 32)
-pygame.display.set_caption("模仿记忆游戏")
+pygame.display.set_caption("记忆小能手")
 
 # fontObj = pygame.font.Font('simsunb.ttf', 32)
 fontObj = pygame.font.SysFont("simhei", 50)
-headTextObj = fontObj.render("模仿记忆游戏", True, WHITE, NAVYBLUE)
+headTextObj = fontObj.render("记忆小能手", True, WHITE, NAVYBLUE)
 headRectObj = headTextObj.get_rect()
 headRectObj.center = (300, 50)
+
+infoDev = pygame.font.SysFont("simhei", 14)
+infoDevTxt = infoDev.render("开发：潘晟尧  指导老师：赵小娜", True, WHITE, NAVYBLUE)
+infoDevRect = infoDevTxt.get_rect()
+infoDevRect.top = 535
+infoDevRect.left = 410
 
 infoFontObj = pygame.font.SysFont("simhei", 18)
 infoAreaTop = 100
@@ -53,16 +60,6 @@ infoRectObj2 = infoTextObj2.get_rect()
 infoRectObj2.top = infoRectObj1.bottom + 10
 infoRectObj2.left = infoAreaLeft
 
-# infoTextObj3 = infoFontObj.render("计  时", True, YELLOW, NAVYBLUE)
-# infoRectObj3 = infoTextObj3.get_rect()
-# infoRectObj3.top = infoRectObj2.bottom + 30
-# infoRectObj3.left = infoAreaLeft
-
-# infoTextObj4 = infoFontObj.render("0秒", True, YELLOW, NAVYBLUE)
-# infoRectObj4 = infoTextObj4.get_rect()
-# infoRectObj4.top = infoRectObj3.bottom + 10
-# infoRectObj4.left = infoAreaLeft
-# # infoRectObj4.center = (580, 230)
 
 infoHelpText = infoFontObj.render("按回车开始", True, YELLOW, NAVYBLUE)
 infoHelpRect = infoHelpText.get_rect()
@@ -81,15 +78,15 @@ rankTmpRect = rankTmpText.get_rect()
 rankTmpRect.left = infoAreaLeft
 rankTmpRect.top = nameRect.bottom + 80
 
-successText = infoFontObj.render("提示", True, YELLOW, NAVYBLUE)
+successText = infoFontObj.render("   ", True, YELLOW, NAVYBLUE)
 successRect = successText.get_rect()
 successRect.left = infoAreaLeft
 successRect.top = 480
 
-BEEP1 = pygame.mixer.Sound('sound/beep1.ogg')
-BEEP2 = pygame.mixer.Sound('sound/beep2.ogg')
-BEEP3 = pygame.mixer.Sound('sound/beep3.ogg')
-BEEP4 = pygame.mixer.Sound('sound/beep4.ogg')
+# BEEP1 = pygame.mixer.Sound(current_dir+'sound/beep1.ogg')
+# BEEP2 = pygame.mixer.Sound(current_dir+'sound/beep2.ogg')
+# BEEP3 = pygame.mixer.Sound(current_dir+'sound/beep3.ogg')
+# BEEP4 = pygame.mixer.Sound(current_dir+'sound/beep4.ogg')
 
 lstRankInfo = []
 lstRankNameAndTime = []
@@ -97,8 +94,8 @@ def getRankInfo(flag = "read"):
     global lstRankInfo, lstRankNameAndTime
     if flag == 'read':
         lstRankNameAndTime = []
-        if os.path.exists(r'rankSim.dat'):
-            with open(r'rankSim.dat', encoding='utf-8' ) as f:
+        if os.path.exists(current_dir+'rankSim.dat'):
+            with open(current_dir+'rankSim.dat', encoding='utf-8' ) as f:
                 icount = 0
                 
                 for irank in f.readlines():
@@ -134,9 +131,8 @@ def getRankInfo(flag = "read"):
             rankInfoStr = ""
             for item in lstRankNameAndTime:
                 rankInfoStr += str(item[0]) + "," + item[1] + '\n'
-            with open(r'rankSim.dat', 'w', encoding='utf-8' ) as f:
+            with open(current_dir+'rankSim.dat', 'w', encoding='utf-8' ) as f:
                 f.write(rankInfoStr)
-
             getRankInfo()
 
 
@@ -157,7 +153,8 @@ def generatePos(flagRight = 0):
 g_Beep_Index = 0
 #绘制背景
 def drawBackGround(slash = 0):
-    global g_slashcount, g_lstslash, BEEP1, BEEP2, BEEP3, BEEP4, g_BEEP_FLAG, g_Beep_Index
+    # global g_slashcount, g_lstslash, BEEP1, BEEP2, BEEP3, BEEP4, g_BEEP_FLAG, g_Beep_Index
+    global g_slashcount, g_lstslash,  g_BEEP_FLAG, g_Beep_Index
     curSurface.fill(NAVYBLUE)
     
     # lstBeep = [BEEP1, BEEP2, BEEP3, BEEP4]
@@ -189,6 +186,7 @@ def drawBackGround(slash = 0):
     curSurface.blit(nameText, nameRect)
     curSurface.blit(successText, successRect)
     curSurface.blit(rankTmpText, rankTmpRect)
+    curSurface.blit(infoDevTxt, infoDevRect)
     curSurface.blit(textinput.get_surface(), (540, nameRect.bottom+10))
 
     for irankinfo in lstRankInfo:
@@ -227,7 +225,7 @@ def StartGameSet(flag_qishi=0):
     gg_lstslashAll = []
     g_BEEP_FLAG = []
     g_COUNT_SUCCESS = 0
-    successText = infoFontObj.render("提示", True, YELLOW, NAVYBLUE)
+    successText = infoFontObj.render("    ", True, YELLOW, NAVYBLUE)
     
 g_GAMESTART = 0
 
@@ -265,7 +263,7 @@ while True:
                 pygame.time.set_timer(COUNTTIMER, 0)
                 pygame.time.set_timer(TIMERUSERDISP, 0)
                 pygame.time.set_timer(GAMETIMER, 0)
-                print("false", )
+                # print("false", )
                 successText = infoFontObj.render("超时挑战失败！", True, RED, NAVYBLUE)
                 getRankInfo('write')
 
@@ -286,16 +284,17 @@ while True:
                     pygame.time.set_timer(COUNTTIMER, 300)
                     pygame.time.set_timer(GAMETIMER, 0)
 
-                    print("true!")
+                    # print("true!")
                 else:
                     g_GAMESTART = 0
-                    g_COUNT_SUCCESS = 0
+                    
                     pygame.time.set_timer(COUNTTIMER, 0)
                     pygame.time.set_timer(TIMERUSERDISP, 0)
                     pygame.time.set_timer(GAMETIMER, 0)
-                    print("false", )
+                    # print("false", )
                     successText = infoFontObj.render("遗憾，失败！", True, RED, NAVYBLUE)
                     getRankInfo('write')
+                    g_COUNT_SUCCESS = 0
                     
 
                 g_Slash = 1
@@ -312,7 +311,7 @@ while True:
                         g_lstslash[i] = 1
                         pygame.time.set_timer(TIMERUSERDISP, 300)
                         g_Slash == 1
-                print(g_CurSn, g_CurSn_user, g_CurSn==g_CurSn_user, g_lstslash)
+                # print(g_CurSn, g_CurSn_user, g_CurSn==g_CurSn_user, g_lstslash)
                 
         
         elif event.type == COUNTTIMER:
@@ -342,7 +341,7 @@ while True:
            
 
         elif event.type == KEYUP:
-            print(event.key, chr(event.key)=='↑', pygame.key.get_mods())
+            # print(event.key, chr(event.key)=='↑', pygame.key.get_mods())
             if event.key == 13: #回车开始
                 StartGameSet(1)
                 g_COUNT_SUCCESS = 0
@@ -355,7 +354,7 @@ while True:
     # # textinput.update(events)
     if textinput.update(events):
         g_USERNAME = textinput.get_text()
-        print(textinput.get_text())
+        # print(textinput.get_text())
 
                 
     pygame.display.update()

@@ -4,6 +4,9 @@ from pygame.locals import *
 import os
 import pygame_textinput
 
+current_dir = os.path.dirname(os.path.abspath(__file__)) + os.sep
+# print(current_dir)
+
 pos_x = 100
 pos_y = 100
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (pos_x,pos_y) #设置窗口起始位置
@@ -68,8 +71,8 @@ lstRankNameAndTime = []
 flag_Start = 0
 
 def getRankInfo():
-    if os.path.exists('rank.dat'):
-        with open('rank.dat', 'r') as f:
+    if os.path.exists(current_dir +'rank.dat'):
+        with open(current_dir + 'rank.dat', 'r') as f:
             icount = 0
             rankTmpText = infoFontObj.render("排名", True, YELLOW, NAVYBLUE)
             rankTmpRect = rankTmpText.get_rect()
@@ -108,7 +111,7 @@ generatePos() #生成所有图标的位置数据
 lstIcon = []
 def loadIcon():
     for i in range(1, 19):
-        iconname = 'image/fruit'+str(i) + '.png'
+        iconname = current_dir + 'image/fruit'+str(i) + '.png'
         tmpimg = pygame.image.load(iconname)
         tmpimg = pygame.transform.smoothscale(tmpimg, (40,40))
         lstIcon.append(tmpimg)
@@ -204,7 +207,7 @@ while True:
                 for  isecond, iname in lstRankNameAndTime[:3]:
                     rankInfoStr += iname + "," + str(isecond) + '秒\n'
 
-                with open('rank.dat', 'w') as f:
+                with open(current_dir + 'rank.dat', 'w') as f:
                     f.write(rankInfoStr)
 
                 lstRankNameAndTime = []

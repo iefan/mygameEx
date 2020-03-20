@@ -31,7 +31,7 @@ MAROON = (200,0,200)
 blockWidth =100 
 # g_ClickCount = -1
 g_TotalSecond = 0
-g_TotalPieNums = 4
+g_TotalPieNums = 3
 
 g_USERNAME = "psy"
 
@@ -44,6 +44,20 @@ pygame.display.set_caption("汉诺塔游戏")
 # fontObj = pygame.font.Font('simsunb.ttf', 32)
 numberFontObj = pygame.font.SysFont("simhei", 36)
 resultFontObj = pygame.font.SysFont("simhei", 22)
+
+#===============================
+g_Text_Game = ""
+gameOverFont = pygame.font.SysFont("simhei", 50)
+gameOverText = gameOverFont.render(g_Text_Game, True, WHITE, NAVYBLUE)
+gameOverRect = gameOverText.get_rect()
+gameOverRect.center = (300, 300)
+
+infoDev = pygame.font.SysFont("simhei", 14)
+infoDevTxt = infoDev.render("作者：长厦小学侯方艺", True, YELLOW, NAVYBLUE)
+infoDevRect = infoDevTxt.get_rect()
+infoDevRect.top = 535
+infoDevRect.left = 480
+#===============================
 
 fontObj = pygame.font.SysFont("simhei", 50)
 headTextObj = fontObj.render("汉诺塔游戏", True, WHITE, NAVYBLUE)
@@ -228,6 +242,8 @@ def drawBackGround():
     curSurface.blit(Level3Text, Level3Rect)
     curSurface.blit(Level4Text, Level4Rect)
     curSurface.blit(Level5Text, Level5Rect)
+    curSurface.blit(gameOverText, gameOverRect)
+    curSurface.blit(infoDevTxt, infoDevRect)
 
     curSurface.blit(textinput.get_surface(), (infoAreaLeft, nameRect.bottom+10))
     for irankinfo in lstRankInfo:
@@ -400,12 +416,17 @@ g_FirstClick = -1
 g_SecondClick = -1
 
 def isGameOver():
-    global g_GAMEOVER, g_TotalPieNums, C_PieRect
+    global g_GAMEOVER, g_TotalPieNums, C_PieRect, g_Text_Game, gameOverText, gameOverRect
     if len(C_PieRect) == g_TotalPieNums+1:
+        g_Text_Game = "游戏结束"
+        gameOverFont = pygame.font.SysFont("simhei", 50)
+        gameOverText = gameOverFont.render(g_Text_Game, True, RED, NAVYBLUE)
+        gameOverRect = gameOverText.get_rect()
+        gameOverRect.center = (300, 300)
         g_GAMEOVER = True
 
 def StartGameSet(flag_qishi=0): 
-    global g_AutoFlag, g_TotalSecond, g_GAMEOVER, g_FirstClick, g_SecondClick, g_ClickFlag, g_PieRect, A_PieRect, B_PieRect, C_PieRect, g_BGRECT
+    global g_AutoFlag, g_TotalSecond, g_GAMEOVER, g_FirstClick, g_SecondClick, g_ClickFlag, g_PieRect, A_PieRect, B_PieRect, C_PieRect, g_BGRECT, gameOverText, gameOverRect
     g_PieRect = []
     A_PieRect = []
     B_PieRect = []
@@ -425,6 +446,11 @@ def StartGameSet(flag_qishi=0):
     g_TotalSecond = 0
     genRectPos()    
     getRankInfo()
+    g_Text_Game = ""
+    gameOverFont = pygame.font.SysFont("simhei", 50)
+    gameOverText = gameOverFont.render(g_Text_Game, True, WHITE, NAVYBLUE)
+    gameOverRect = gameOverText.get_rect()
+    gameOverRect.center = (300, 300)
     
 
 COUNTTIMER = pygame.USEREVENT
@@ -469,7 +495,7 @@ while True:
 
 
         elif event.type == KEYUP:
-            print(event.key, chr(event.key)=='↑', pygame.key.get_mods())
+            # print(event.key, chr(event.key)=='↑', pygame.key.get_mods())
            
             if event.key == 13: #重新开始
                 StartGameSet(1)
@@ -481,7 +507,7 @@ while True:
     # # textinput.update(events)
     if textinput.update(events):
         g_USERNAME = textinput.get_text()
-        print(textinput.get_text())
+        # print(textinput.get_text())
 
                 
     pygame.display.update()
