@@ -53,10 +53,10 @@ gameOverRect = gameOverText.get_rect()
 gameOverRect.center = (300, 300)
 
 infoDev = pygame.font.SysFont("simhei", 14)
-infoDevTxt = infoDev.render("作者：长厦小学侯方艺", True, YELLOW, NAVYBLUE)
+infoDevTxt = infoDev.render("作者：长厦小学302侯方艺", True, YELLOW, NAVYBLUE)
 infoDevRect = infoDevTxt.get_rect()
 infoDevRect.top = 535
-infoDevRect.left = 480
+infoDevRect.left = 450
 #===============================
 
 fontObj = pygame.font.SysFont("simhei", 50)
